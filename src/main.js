@@ -3,6 +3,12 @@ import App from './App.vue'
 import router from './router'
 import store from './store'
 import '@/styles/index.less'
+// 加载Vant 核心组件库
+import Vant from 'vant'
+// 加载Vant 全局样式
+import 'vant/lib/index.css'
+
+Vue.use(Vant)
 
 Vue.config.productionTip = false
 
