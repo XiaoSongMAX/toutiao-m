@@ -9,6 +9,7 @@ import Vant from 'vant'
 import 'vant/lib/index.css'
 // 加载动态设置 rem 基准值
 import 'amfe-flexible'
+import './utils/dayjs'
 
 Vue.use(Vant)
 

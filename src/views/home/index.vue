@@ -1,7 +1,8 @@
 <template>
   <div class="home-container">
     <!-- 导航栏 -->
-    <van-nav-bar class="page-nav-bar">
+    <van-nav-bar class="page-nav-bar"
+                 fixed>
       <van-button class="search-btn"
                   slot="title"
                   type="info"
@@ -25,26 +26,42 @@
       <div slot="nav-right"
            class="placeholder"></div>
       <div slot="nav-right"
-           class="hamburger-btn">
+           class="hamburger-btn"
+           @click="isChannelEditShow=true">
         <i class="toutiao toutiao-gengduo"></i>
       </div>
     </van-tabs>
     <!-- /频道列表 -->
+    <!-- 频道编辑弹出层 -->
+    <van-popup v-model="isChannelEditShow"
+               closeable
+               position="bottom"
+               close-icon-position="top-left"
+               :style="{ height: '100%' }">
+      <channel-edit :my-channels="channels"
+                    :active="active"
+                    @update-active="onUpdateActive"></channel-edit>
+    </van-popup>
+    <!-- /频道编辑弹出层 -->
   </div>
 </template>
 
 <script>
 import { getUserChannels } from '@/api/user'
 import ArticleList from './components/article-list.vue'
+
+import ChannelEdit from './components/channel-edit.vue'
 export default {
   name: 'HomeIndex',
   components: {
-    ArticleList
+    ArticleList,
+    ChannelEdit
   },
   data () {
     return {
       active: 2,
-      channels: []
+      channels: [],
+      isChannelEditShow: false
     }
   },
   created () {
@@ -59,12 +76,18 @@ export default {
       } catch (err) {
         this.$toast('获取频道数据失败')
       }
+    },
+    onUpdateActive (index, isChannelEditShow = true) {
+      this.active = index
+      this.isChannelEditShow = isChannelEditShow
     }
   }
 }
 </script>
 <style scoped lang="less">
 .home-container {
+  padding-top: 174px;
+  padding-bottom: 100px;
   .search-btn {
     width: 555px;
     height: 64px;
@@ -78,6 +101,11 @@ export default {
   }
   /deep/ .channel-tabs {
     .van-tabs__wrap {
+      position: fixed;
+      top: 92px;
+      z-index: 1;
+      left: 0;
+      right: 0;
       height: 82px;
     }
     .van-tab {
@@ -98,7 +126,6 @@ export default {
       height: 6px;
       background-color: #3296fb;
     }
-
     .hamburger-btn {
       position: fixed;
       right: 0;
