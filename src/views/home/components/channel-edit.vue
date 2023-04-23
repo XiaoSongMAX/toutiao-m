@@ -50,9 +50,10 @@
 </template>
 
 <script>
-import { getAllChannels } from '@/api/channel'
+import { getAllChannels, addUserChannels, deleteUserChannels } from '@/api/channel'
 import { mapState } from 'vuex'
 import { setItem } from '@/utils/storage'
+
 export default {
   name: 'ChannelEdit',
   components: {},
@@ -105,14 +106,21 @@ export default {
         this.$toast('数据获取失败')
       }
     },
-    onAddChannel (channel) {
+    async onAddChannel (channel) {
       // eslint-disable-next-line vue/no-mutating-props
       this.myChannels.push(channel)
       // 数据持久化处理
       // 未登录,把 数据存储到本地
       // 已登录,把数据请求接口放到线上
       if (this.user) {
-        console.log()
+        try {
+          await addUserChannels({
+            id: channel.id,
+            seq: this.myChannels.length
+          })
+        } catch (err) {
+          this.$toast('保存失败,请稍后再试')
+        }
       } else {
         // 未登录 ,把数据存储到本地
         setItem('TOUTIAO', this.myChannels)
@@ -127,13 +135,27 @@ export default {
         if (index <= this.active) {
           this.$emit('update-active', this.active - 1, true)
         }
-
-        // 编辑转台 执行删除频道
-        // 参数  要删除的元素 开始索引
         // eslint-disable-next-line vue/no-mutating-props
         this.myChannels.splice(index, 1)
+        // 处理持久化
+        this.deleteChannel(channel)
+        // 编辑转台 执行删除频道
+        // 参数  要删除的元素 开始索引
       } else {
         this.$emit('update-active', index, false)
+      }
+    },
+    async deleteChannel (channel) {
+      try {
+        if (this.user) {
+          // 已登录,将数据更新到线上
+          await deleteUserChannels(channel.id)
+        } else {
+          // 未登录,将数据更新到本地
+          setItem('TOUTIAO', this.myChannels)
+        }
+      } catch (err) {
+        this.$toast('保存失败,请稍后再试')
       }
     }
   }

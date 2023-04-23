@@ -19,6 +19,5 @@ export default new Vuex.Store({
       setItem(TOKEN_KEY, state.user)
     }
   },
-  actions: {},
-  modules: {}
+  actions: {}
 })

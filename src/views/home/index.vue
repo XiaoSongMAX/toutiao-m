@@ -8,7 +8,8 @@
                   type="info"
                   size="small"
                   round
-                  icon="search">搜索
+                  icon="search"
+                  to="/search">搜索
       </van-button>
     </van-nav-bar>
     <!-- 频道列表 -->
@@ -51,6 +52,8 @@ import { getUserChannels } from '@/api/user'
 import ArticleList from './components/article-list.vue'
 
 import ChannelEdit from './components/channel-edit.vue'
+import { mapState } from 'vuex'
+import { getItem } from '@/utils/storage'
 export default {
   name: 'HomeIndex',
   components: {
@@ -64,15 +67,36 @@ export default {
       isChannelEditShow: false
     }
   },
+  computed: {
+    ...mapState(['user'])
+  },
   created () {
     this.localChannels()
   },
   methods: {
     async localChannels () {
       try {
-        const { data } = await getUserChannels()
-        this.channels = data.data.channels
-        console.log(data)
+        // const { data } = await getUserChannels()
+        // this.channels = data.data.channels
+        // 已登录,请求获取用户频道列表
+        // 未登录,判断是否有本地频道列表数据
+        // 有拿来用
+        // 没有请求获取默认频道列表
+        let channels = []
+        if (this.user) {
+          const { data } = await getUserChannels()
+          channels = data.data.channels
+        } else {
+          // 未登录,判断是否有本地频道列表数据
+          const localChannels = getItem('TOUTIAO')
+          if (localChannels) {
+            channels = localChannels
+          } else {
+            const { data } = await getUserChannels()
+            channels = data.data.channels
+          }
+        }
+        this.channels = channels
       } catch (err) {
         this.$toast('获取频道数据失败')
       }
